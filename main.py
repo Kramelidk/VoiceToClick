@@ -1,3 +1,12 @@
+#pip install pyautogui
+#pip install sounddevice
+#pip install numpy
+#pip install pyobjc-framework-Quartz  # Required for pyautogui on macOS
+#pip install pyobjc-framework-CoreAudio  # Required for sounddevice on macOS
+#pip install ctypes
+#pip install clint
+
+
 import pyautogui
 import sounddevice as sd
 import numpy as np
