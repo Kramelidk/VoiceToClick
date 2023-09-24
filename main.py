@@ -1,11 +1,8 @@
 #pip install pyautogui
 #pip install sounddevice
 #pip install numpy
-#pip install pyobjc-framework-Quartz  # Required for pyautogui on macOS
-#pip install pyobjc-framework-CoreAudio  # Required for sounddevice on macOS
 #pip install ctypes
 #pip install clint
-
 
 import pyautogui
 import sounddevice as sd
@@ -15,28 +12,16 @@ from clint.textui import colored
 
 ctypes.windll.kernel32.SetConsoleTitleW("VTC (VoiceToClick) by kramel")
 
-
 audio_threshold_input = input("Enter audio threshold (recommended is 1): ")
 if audio_threshold_input:
     audio_threshold = float(audio_threshold_input)
 else:
     audio_threshold = 1
 
-
-click_duration_input = input("Enter click duration in seconds (recommended is 0.05): ")
-if click_duration_input:
-    click_duration = float(click_duration_input)
-else:
-    click_duration = 0.05
-
-
-
 clicking = False
+screaming = False
 
-print(f" audio threshold - {audio_threshold}")
-
-print(f" click duration - {click_duration}")
-print("")
+print(f" audio threshold - {audio_threshold}\n")
 
 print(colored.green("running!"))
 
@@ -50,15 +35,18 @@ def stop_clicking():
     global clicking
     clicking = False
     pyautogui.mouseUp()
+    print("released")
 
 def callback(indata, frames, time, status):
-    global clicking
+    global clicking, screaming
     volume_norm = np.linalg.norm(indata) * 10
     if volume_norm > audio_threshold:
-        if not clicking:
+        if not screaming:
+            screaming = True
             start_clicking()
     else:
-        if clicking:
+        if screaming:
+            screaming = False
             stop_clicking()
 
 stream = sd.InputStream(callback=callback, latency='low', channels=1)
@@ -70,5 +58,7 @@ try:
 except KeyboardInterrupt:
     pass
 finally:
+    if screaming:
+        stop_clicking()
     stream.stop()
     stream.close()
